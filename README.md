@@ -1,11 +1,13 @@
-Implementation of contracts for [ERC-4337](https://eips.ethereum.org/EIPS/eip-4337) account abstraction via alternative mempool.
+# Sample Hardhat Project
 
-# Resources
+This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
 
-[Vitalik's post on account abstraction without Ethereum protocol changes](https://medium.com/infinitism/erc-4337-account-abstraction-without-ethereum-protocol-changes-d75c9d94dc4a)
+Try running some of the following tasks:
 
-[Discord server](http://discord.gg/fbDyENb6Y9)
-
-[Bundler reference implementation](https://github.com/eth-infinitism/bundler)
-
-[Bundler specification test suite](https://github.com/eth-infinitism/bundler-spec-tests)
+```shell
+npx hardhat help
+npx hardhat test
+REPORT_GAS=true npx hardhat test
+npx hardhat node
+npx hardhat run scripts/deploy.js
+```

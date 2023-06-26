@@ -14,39 +14,60 @@ import "./SimpleAccount.sol";
  */
 contract SimpleAccountFactory {
     SimpleAccount public immutable accountImplementation;
+    mapping(address => uint) private balance;
 
     constructor(IEntryPoint _entryPoint) {
         accountImplementation = new SimpleAccount(_entryPoint);
     }
 
     /**
-     * create an account, and return its address.
-     * returns the address even if the account is already deployed.
+     * Create an account and return its address.
+     * Returns the address even if the account is already deployed.
      * Note that during UserOperation execution, this method is called only if the account is not deployed.
-     * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
+     * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation.
      */
-    function createAccount(address owner,uint256 salt) public returns (SimpleAccount ret) {
-        address addr = getAddress(owner, salt);
-        uint codeSize = addr.code.length;
+    function createAccount(address owner, uint256 salt) public returns (SimpleAccount) {
+        address addr = getCreatedAddress(owner, salt);
+        uint256 codeSize = addr.code.length;
         if (codeSize > 0) {
             return SimpleAccount(payable(addr));
         }
-        ret = SimpleAccount(payable(new ERC1967Proxy{salt : bytes32(salt)}(
-                address(accountImplementation),
-                abi.encodeCall(SimpleAccount.initialize, (owner))
-            )));
+
+        address proxyAddress = address(new ERC1967Proxy{salt: bytes32(salt)}(
+            address(accountImplementation),
+            abi.encodeWithSignature("initialize(address)", owner)
+        ));
+        return SimpleAccount(payable(proxyAddress));
+    }
+
+    
+    /**
+     * Add funds to a wallet.
+     */
+    function fundWallet(address account) public payable {
+        balance[account] += msg.value;
     }
 
     /**
-     * calculate the counterfactual address of this account as it would be returned by createAccount()
+     * Calculate the counterfactual address of this account as it would be returned by createAccount().
      */
-    function getAddress(address owner,uint256 salt) public view returns (address) {
-        return Create2.computeAddress(bytes32(salt), keccak256(abi.encodePacked(
-                type(ERC1967Proxy).creationCode,
-                abi.encode(
-                    address(accountImplementation),
-                    abi.encodeCall(SimpleAccount.initialize, (owner))
+    function getCreatedAddress(address owner, uint256 salt) public view returns (address) {
+        return Create2.computeAddress(
+            bytes32(salt),
+            keccak256(
+                abi.encodePacked(
+                    type(ERC1967Proxy).creationCode,
+                    abi.encode(address(accountImplementation), abi.encodeWithSignature("initialize(address)", owner))
                 )
-            )));
+            )
+        );
+    }
+
+
+    /**
+     * Get the balance of a wallet.
+     */
+    function balanceOf(address account) public view returns (uint256) {
+        return balance[account];
     }
 }
