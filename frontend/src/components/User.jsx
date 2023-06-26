@@ -1,42 +1,69 @@
 import { useState } from "react";
-import { CreateNewAccount } from "./Blockchains";
+import { Balance, CreateNewAccount, FundWallet, GetCreatedAddress } from "./Blockchains";
+import {  useGlobalState } from "./store";
 
 const User = () => {
+
+  const [newAddress] = useGlobalState("Newaddress");
+  const [bal] = useGlobalState("bal");
+
   const [address, setAddress] = useState("");
   const [salt, setSalt] = useState("");
   const [account, setAccount] = useState("");
   const [balance, setBalance] = useState("");
+  const [amount, setAmount] = useState("");
 
-  const [newaddress, setNewaddress] = useState("");
-  const [newsalt, setNewsalt] = useState("");
+  const [newaddress, setNewAddress] = useState("");
+  const [newsalt, setNewSalt] = useState("");
 
   const submitAccount = async (e) => {
     e.preventDefault();
-    console.log("testing")
-    if(!address || !salt) return
+    if (!address || !salt) return;
     try {
-    console.log("testing --------")
-        
-      const result = await CreateNewAccount(address, salt)
+      const result = await CreateNewAccount(address, salt);
       if (result === true) {
-        alert("success")
-      }else {
-        alert("Failed to create new account")
+        alert("Success");
+      } else {
+        alert("Failed to create a new account");
       }
-      console.log("result ",result)
     } catch (error) {
-      console.log(error)
-  }
-  
+      console.log(error);
+    }
   };
 
-  const onFund = () => {
-    console.log(account);
-  };
-
-  const onFormSubmit = (e) => {
+  const onFund = async (e) => {
     e.preventDefault();
-    console.log(newaddress, newsalt);
+    if (!account || !amount) return;
+    try {
+      const result = await FundWallet(account, amount);
+      if (result === true) {
+        alert("Success");
+      } else {
+        alert("Failed to fund the wallet");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onFormSubmit = async (e) => {
+    e.preventDefault();
+    if (!newaddress || !newsalt) return;
+    try {
+      const result = await GetCreatedAddress(newaddress, Number(newsalt));
+      if (result === true) {
+        alert("Success");
+      } else {
+        alert("Failed to get the created address");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const checkBalance = async(e) => {
+    e.preventDefault();
+   await Balance(balance);
   };
 
   return (
@@ -91,7 +118,7 @@ const User = () => {
         >
           <div className="mb-4">
             <div className="font-semibold text-lg bg-blue-300 uppercase text-white mb-4 p-2 rounded shadow-md">
-              Get Address 
+              Get Address
             </div>
             <label htmlFor="newaddress" className="text-md font-semibold text-gray-700 mb-2">
               Address
@@ -100,9 +127,9 @@ const User = () => {
               type="text"
               id="newaddress"
               className="border border-gray-300 rounded-md w-full py-2 px-3"
-              placeholder="salt"
+              placeholder="Address"
               value={newaddress}
-              onChange={(e) => setNewaddress(e.target.value)}
+              onChange={(e) => setNewAddress(e.target.value)}
               required
             />
           </div>
@@ -111,12 +138,12 @@ const User = () => {
               Salt
             </label>
             <input
-              type="text"
+              type="number"
               id="newsalt"
               className="border border-gray-300 rounded-md w-full py-2 px-3"
-              placeholder="salt "
+              placeholder="Salt"
               value={newsalt}
-              onChange={(e) => setNewsalt(e.target.value)}
+              onChange={(e) => setNewSalt(e.target.value)}
               required
             />
           </div>
@@ -127,11 +154,9 @@ const User = () => {
             Submit
           </button>
         </form>
-
-        {/* Display after Get Address form submission */}
-        {newaddress && newsalt && (
+        {newAddress && (
           <div className="bg-green-200 py-2 px-4 mt-4 rounded">
-            Address: {newaddress}, Salt: {newsalt}
+            Address: {newAddress}
           </div>
         )}
       </div>
@@ -139,7 +164,7 @@ const User = () => {
       <div className="flex flex-col w-1/2 ml-4">
         <form
           className="bg-white p-8 shadow-md rounded-lg mb-4"
-          onSubmit={onFormSubmit}
+          onSubmit={onFund}
         >
           <div className="font-semibold text-lg bg-blue-300 uppercase text-white mb-4 p-2 rounded shadow-md">
             Fund Wallet
@@ -158,9 +183,22 @@ const User = () => {
               required
             />
           </div>
+          <div className="mb-4">
+            <label htmlFor="amount" className="text-md font-semibold text-gray-700 mb-2">
+              Amount
+            </label>
+            <input
+              type="number"
+              id="amount"
+              className="border border-gray-300 rounded-md w-full py-2 px-3"
+              placeholder="Amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              required
+            />
+          </div>
           <button
-            type="button"
-            onClick={onFund}
+            type="submit"
             className="flex bg-blue-500 text-white py-2 px-4 rounded-md justify-center items-center hover:bg-blue-600 transition-colors"
           >
             Submit
@@ -169,7 +207,7 @@ const User = () => {
 
         <form
           className="bg-white p-8 shadow-md rounded-lg"
-          onSubmit={onFormSubmit}
+          onSubmit={checkBalance}
         >
           <div className="font-semibold text-lg bg-blue-300 uppercase text-white mb-4 p-2 rounded shadow-md">
             Wallet Balance
@@ -182,14 +220,15 @@ const User = () => {
               type="text"
               id="balance"
               className="border border-gray-300 rounded-md w-full py-2 px-3"
-              placeholder="Address"
+              placeholder="Account"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
               required
             />
           </div>
           <button
-            type="button"
+            type="submit"
+            onClick={checkBalance}
             className="flex bg-blue-500 text-white py-2 px-4 rounded-md justify-center items-center hover:bg-blue-600 transition-colors"
           >
             Submit
@@ -197,9 +236,9 @@ const User = () => {
         </form>
 
         {/* Display after Wallet Address form submission */}
-        {balance && (
+        {bal && (
           <div className="bg-green-200 py-2 px-4 mt-4 rounded">
-            Wallet Address: {balance}
+            Wallet Balance: {bal}
           </div>
         )}
       </div>

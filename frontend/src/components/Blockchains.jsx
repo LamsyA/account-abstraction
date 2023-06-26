@@ -9,7 +9,7 @@ const {ethereum } = window
 const contractAbi = abi.abi
 
 
-const contractAddress =  '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512';
+const contractAddress =  '0x510f0Cc1B138F440a905C11c71cCd1F358eBd3BA';
 const connectWallet = async () => {
     try {
         if (!ethereum) return alert('Wallet not found')
@@ -75,87 +75,51 @@ const isWalletConnected = async () => {
     
   }
 
-  const FundWallet = async (account ) => {
+  const FundWallet = async (account, amount ) => {
     try {
   
       if (!ethereum) return alert("Please install Metamask")
       // const connectedAccount = getGlobalState("connectedAccount")
+      const amt = ethers.utils.parseEther(amount)
+      console.log("..............",amt)
       const contract = await getContract()
-      const organisation = await contract.fundWallet(account)
+      const organisation = await contract.fundWallet(account,{value: amt})
       // setGlobalState("organisation", organisation )
       console.log(organisation) ;
-    } catch (error) {
-      reportError(error)
-    }
-  }
-
-  const listStakeholder = async ( ) => {
-    try {
-  
-      if (!ethereum) return alert("Please install Metamask")
-      const connectedAccount = getGlobalState("connectedAccount")
-      const contract = await getContract()
-      const organisation = await contract.getStakeholderPostion(connectedAccount)
-      setGlobalState("organisation", organisation )
-      console.log(organisation) ;
-    } catch (error) {
-      reportError(error)
-    }
-  }
-
-
-  const addNewStakeholder = async ( _stakeholderAddress,_post, _vestingPeriod, _token) => {
-    try {
-  
-      if (!ethereum) return alert("Please install Metamask")
-      // const connectedAccount = getGlobalState("connectedAccount")
-      const contract = await getContract()
-      const organisation = await contract.addStakeholder(_stakeholderAddress,_post, _vestingPeriod, _token)
-      console.log("organisation ",organisation)
-      
       return true;
     } catch (error) {
       reportError(error)
     }
   }
 
-  const addToWhitelist = async (_address) => {
+  const GetCreatedAddress = async ( newaddress, newsalt ) => {
     try {
   
       if (!ethereum) return alert("Please install Metamask")
       // const connectedAccount = getGlobalState("connectedAccount")
+      console.log("Connected to", newaddress, newsalt)
       const contract = await getContract()
-      const organisation = await contract.whitelistAddress(_address)
-      console.log("organisation ",organisation)
-      return true;
-    } catch (error) {
-      reportError(error)
-    }
-  }
-  
-  const claimVesting = async () => {
-    try {
-  
-      if (!ethereum) return alert("Please install Metamask")
-      // const connectedAccount = getGlobalState("connectedAccount")
-      const contract = await getContract()
-      const organisation = await contract.claimToken()
-      console.log("organisation ",organisation)
+      const Newaddress = await contract.getCreatedAddress(newaddress, newsalt)
+      setGlobalState("Newaddress", Newaddress )
+      console.log(Newaddress) ;
       return true;
     } catch (error) {
       reportError(error)
     }
   }
 
-  const Balance = async () => {
+
+ 
+
+  const Balance = async (account) => {
     try {
   
       if (!ethereum) return alert("Please install Metamask")
-      const connectedAccount = getGlobalState("connectedAccount")
+      // const connectedAccount = getGlobalState("connectedAccount")
       const contract = await getContract()
-      const bal = await contract.balance(connectedAccount)
-      console.log("bal ",bal.toString())
-      setGlobalState('bal', bal.toString())
+      const bal = await contract.balanceOf(account)
+      console.log("bal ",Number(bal))
+      setGlobalState('bal', Number(bal))
       return bal;
     } catch (error) {
       reportError(error)
@@ -175,6 +139,7 @@ export {
     isWalletConnected,
     getContract,
     CreateNewAccount,
+    GetCreatedAddress,
     FundWallet,
     Balance,
 }

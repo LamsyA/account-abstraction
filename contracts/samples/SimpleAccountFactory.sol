@@ -51,13 +51,13 @@ contract SimpleAccountFactory {
     /**
      * Calculate the counterfactual address of this account as it would be returned by createAccount().
      */
-    function getCreatedAddress(address owner, uint256 salt) public view returns (address) {
+    function getCreatedAddress(address newaddress, uint256  newsalt) public view returns (address) {
         return Create2.computeAddress(
-            bytes32(salt),
+            bytes32(newsalt),
             keccak256(
                 abi.encodePacked(
                     type(ERC1967Proxy).creationCode,
-                    abi.encode(address(accountImplementation), abi.encodeWithSignature("initialize(address)", owner))
+                    abi.encode(address(accountImplementation), abi.encodeWithSignature("initialize(address)", newaddress))
                 )
             )
         );

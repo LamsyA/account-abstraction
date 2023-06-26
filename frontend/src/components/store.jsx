@@ -5,7 +5,7 @@ const { setGlobalState, useGlobalState, getGlobalState } = createGlobalState({
 
     connectedAccount: '',
     contract: null,
-    organisation: [],
+    Newaddress: '',
     bal: '',
     
 })

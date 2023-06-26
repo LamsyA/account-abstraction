@@ -47,7 +47,7 @@ describe("SimpleAccountFactory", function () {
     // Verify the balance
     const updatedBalance = await simpleAccountFactory.balanceOf(user1.address);
     expect(updatedBalance.toString()).to.equal(amount.toString());
-  });
+  }); 
 
   it("should return the balance of a wallet", async function () {
     const balance = await simpleAccountFactory.balanceOf(user1.address);
